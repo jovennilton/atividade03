@@ -1,0 +1,91 @@
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<Point> pontosP = new ArrayList<>();
+        List<Point> pontosQ = new ArrayList<>();
+
+        pontosP.add(new Point(1, 5));
+        pontosP.add(new Point(6, 1));
+        pontosP.add(new Point(8, 3));
+
+        pontosQ.add(new Point(6, 1));
+        pontosQ.add(new Point(8, 3));
+        pontosQ.add(new Point(1, 5));
+
+        double distanciaMinima = menorDistanciaAlgoritmoDivisaoConquista(pontosP, pontosQ);
+        System.out.println("A distância mínima é = "+distanciaMinima);
+    }
+
+    public static double menorDistanciaAlgoritmoForcaBruta(List<Point> p) {
+        double valorBaseMin = 99999999;
+
+        for(int i = 0; i < p.size() - 1; i++) {
+            for(int j = i+1; j < p.size(); j++) {
+                double distancia = p.get(i).distance(p.get(j));
+                if (valorBaseMin > distancia) {
+                    valorBaseMin = distancia;
+                }
+            }
+        }
+        return valorBaseMin;
+    }
+
+    private static double menorDistanciaAlgoritmoDivisaoConquista(List<Point> pontosP, List<Point> pontosQ) {
+        if(pontosP.size() <= 3) {
+            return menorDistanciaAlgoritmoForcaBruta(pontosP);
+        } else {
+            List<Point> pontosPEsq = new ArrayList<>();
+            List<Point> pontosQEsq  = new ArrayList<>();
+            List<Point> pontosPDir = new ArrayList<>();
+            List<Point> pontosQDir = new ArrayList<>();
+
+            for(int i = 0; i < pontosP.size() / 2; i++) {
+                pontosPEsq.add(pontosP.get(i));
+            }
+            for(int i = 0; i < pontosQ.size() / 2; i++) {
+                pontosQEsq.add(pontosQ.get(i));
+            }
+            for(int i = (pontosP.size() / 2); i < pontosP.size(); i++) {
+                pontosPDir.add(pontosP.get(i));
+            }
+            for(int i = (pontosQ.size() / 2); i < pontosQ.size(); i++) {
+                pontosQDir.add(pontosQ.get(i));
+            }
+
+            double distanciaEsq = menorDistanciaAlgoritmoDivisaoConquista(pontosPEsq, pontosQEsq);
+            double distanciaDir = menorDistanciaAlgoritmoDivisaoConquista(pontosPDir, pontosQDir);
+            double distanciaMin = Math.min(distanciaEsq, distanciaDir);
+            double valorXBase = pontosP.get((pontosP.size() / 2) - 1).x;
+
+            List<Point> S = new ArrayList<>();
+
+            for(int i = 0; i < pontosQ.size(); i++) {
+                double valor = pontosQ.get(i).x - valorXBase;
+                if(valor < 0) {
+                    valor *= -1;
+                }
+                if(valor < distanciaMin) {
+                    S.add(pontosQ.get(i));
+                }
+            }
+            double dminsq = Math.pow(distanciaMin, 2);
+
+            for(int i = 0; i < S.size() - 1; i++) {
+                int k = i + 1;
+
+                while (k < S.size() && Math.pow(S.get(k).getY() - S.get(i).getY(), 2) < dminsq) {
+                    double distMinEntrePontos = Math.pow(S.get(k).getX() - S.get(i).getX(), 2) +
+                            Math.pow(S.get(k).getY() - S.get(i).getY(), 2);
+                    dminsq = Math.min(distMinEntrePontos, dminsq);
+                    k = k+1;
+                }
+            }
+            return Math.sqrt(dminsq);
+        }
+    }
+}
